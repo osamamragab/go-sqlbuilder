@@ -38,17 +38,21 @@ func NewQuery(table string) *Query {
 	}
 }
 
+func (q *Query) addColumns(columns ...string) {
+	for i, c := range columns {
+		q.str.WriteString(c)
+		if i != len(columns)-1 {
+			q.str.WriteByte(',')
+		}
+	}
+}
+
 // Select returns sql select statement.
 func (q *Query) Select(columns ...string) *Statement {
 	q.reset()
 	q.str.WriteString("SELECT ")
 	if columns != nil {
-		for i, c := range columns {
-			q.str.WriteString(c)
-			if i != len(columns)-1 {
-				q.str.WriteByte(',')
-			}
-		}
+		q.addColumns(columns...)
 	} else {
 		q.str.WriteByte('*')
 	}
