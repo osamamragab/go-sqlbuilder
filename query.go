@@ -89,3 +89,19 @@ func (q *Query) Insert(columns []string, values ...[]string) *Statement {
 	}
 	return &Statement{q}
 }
+
+// Update returns sql update statement.
+func (q *Query) Update(data map[string]interface{}) *Statement {
+	q.reset()
+	q.str.WriteString("UPDATE " + q.table + " SET ")
+	i := len(data) - 1
+	for k, v := range data {
+		q.str.WriteString(k + "=")
+		q.addArg(v)
+		if i != 0 {
+			q.str.WriteByte(',')
+		}
+		i--
+	}
+	return &Statement{q}
+}
