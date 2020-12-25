@@ -2,7 +2,7 @@ package sqlbuilder
 
 import "strings"
 
-// Query describes an SQL query.
+// Query describes an sql query.
 type Query struct {
 	str   *strings.Builder
 	args  []interface{}
@@ -32,5 +32,26 @@ func (q *Query) Table() string {
 
 // NewQuery returns new Query with table.
 func NewQuery(table string) *Query {
-	return &Query{table: table}
+	return &Query{
+		str:   &strings.Builder{},
+		table: table,
+	}
+}
+
+// Select returns sql select statement.
+func (q *Query) Select(columns ...string) *Statement {
+	q.reset()
+	q.str.WriteString("SELECT ")
+	if columns != nil {
+		for i, c := range columns {
+			q.str.WriteString(c)
+			if i != len(columns)-1 {
+				q.str.WriteByte(',')
+			}
+		}
+	} else {
+		q.str.WriteByte('*')
+	}
+	q.str.WriteString(" FROM " + q.table)
+	return &Statement{q}
 }
