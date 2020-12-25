@@ -105,3 +105,10 @@ func (q *Query) Update(data map[string]interface{}) *Statement {
 	}
 	return &Statement{q}
 }
+
+// Delete returns sql delete statement.
+func (q *Query) Delete() *Statement {
+	q.reset()
+	q.str.WriteString("DELETE FROM " + q.table)
+	return &Statement{q}
+}
