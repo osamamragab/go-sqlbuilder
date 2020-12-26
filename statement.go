@@ -30,3 +30,27 @@ func (s *Statement) Where(str string, args ...interface{}) *Statement {
 	}
 	return s
 }
+
+// Limit adds sql limit to query.
+//
+// Limit panics if n <= 0.
+func (s *Statement) Limit(n int) *Statement {
+	if n <= 0 {
+		panic("invalid limit value")
+	}
+	s.str.WriteString("LIMIT ")
+	s.addArg(n)
+	return s
+}
+
+// Offset adds sql offset to query.
+//
+// Offset panics if n <= 0.
+func (s *Statement) Offset(n int) *Statement {
+	if n <= 0 {
+		panic("invalid offset value")
+	}
+	s.str.WriteString("OFFSET ")
+	s.addArg(n)
+	return s
+}
