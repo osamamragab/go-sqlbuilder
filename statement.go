@@ -57,3 +57,24 @@ func (s *Statement) Offset(n int) *Statement {
 	s.addArg(n)
 	return s
 }
+
+// OrderBy adds sql order by columns asc to query.
+func (s *Statement) OrderBy(columns ...string) *Statement {
+	if len(columns) > 0 {
+		s.str.WriteString("ORDER BY ")
+		for i, c := range columns {
+			s.str.WriteString(c)
+			if i != len(columns)-1 {
+				s.str.WriteByte(',')
+			}
+		}
+	}
+	return s
+}
+
+// OrderByDesc adds sql order by columns desc to query.
+func (s *Statement) OrderByDesc(columns ...string) *Statement {
+	s.OrderBy(columns...)
+	s.str.WriteString(" DESC")
+	return s
+}
