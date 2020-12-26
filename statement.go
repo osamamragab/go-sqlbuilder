@@ -9,7 +9,10 @@ type Statement struct {
 
 // Where adds sql where condition to query.
 // Example:
-//	Where("id = $@ AND name = $@", 1, "David")
+//	q.Select("name").Where("id = $@ AND username = $@", 1, "david")
+//	q.String() -> "SELECT name FROM tablename WHERE id = $1 AND username = $2"
+//	q.Args()   -> [1, "david"]
+//
 // "$@" are replaced with argument number.
 func (s *Statement) Where(str string, args ...interface{}) *Statement {
 	s.str.WriteString(" WHERE ")
