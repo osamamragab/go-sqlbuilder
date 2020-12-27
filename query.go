@@ -20,6 +20,12 @@ func NewQuery(table string) *Query {
 	}
 }
 
+// Reset resets query string and arguments.
+func (q *Query) Reset() {
+	q.str.Reset()
+	q.args = nil
+}
+
 // String returns query string.
 func (q *Query) String() string {
 	return q.str.String()
@@ -35,10 +41,10 @@ func (q *Query) Table() string {
 	return q.table
 }
 
-// Reset resets query string and arguments.
-func (q *Query) Reset() {
-	q.str.Reset()
-	q.args = nil
+// SetTable sets table field and calls Reset.
+func (q *Query) SetTable(table string) {
+	q.Reset()
+	q.table = table
 }
 
 func (q *Query) addColumns(columns ...string) {
