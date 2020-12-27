@@ -20,12 +20,6 @@ func NewQuery(table string) *Query {
 	}
 }
 
-// reset resets query string and arguments.
-func (q *Query) reset() {
-	q.str.Reset()
-	q.args = nil
-}
-
 // String returns query string.
 func (q *Query) String() string {
 	return q.str.String()
@@ -39,6 +33,12 @@ func (q *Query) Args() []interface{} {
 // Table returns table name.
 func (q *Query) Table() string {
 	return q.table
+}
+
+// Reset resets query string and arguments.
+func (q *Query) Reset() {
+	q.str.Reset()
+	q.args = nil
 }
 
 func (q *Query) addColumns(columns ...string) {
@@ -57,7 +57,7 @@ func (q *Query) addArg(arg interface{}) {
 
 // Select returns sql select statement.
 func (q *Query) Select(columns ...string) *Statement {
-	q.reset()
+	q.Reset()
 	q.str.WriteString("SELECT ")
 	if columns != nil {
 		q.addColumns(columns...)
@@ -70,7 +70,7 @@ func (q *Query) Select(columns ...string) *Statement {
 
 // Insert returns sql insert statement.
 func (q *Query) Insert(columns []string, values ...[]string) *Statement {
-	q.reset()
+	q.Reset()
 	q.str.WriteString("INSERT INTO " + q.table + " (")
 	q.addColumns(columns...)
 	q.str.WriteString(") VALUES ")
@@ -92,7 +92,7 @@ func (q *Query) Insert(columns []string, values ...[]string) *Statement {
 
 // Update returns sql update statement.
 func (q *Query) Update(data map[string]interface{}) *Statement {
-	q.reset()
+	q.Reset()
 	q.str.WriteString("UPDATE " + q.table + " SET ")
 	i := len(data) - 1
 	for k, v := range data {
@@ -108,7 +108,7 @@ func (q *Query) Update(data map[string]interface{}) *Statement {
 
 // Delete returns sql delete statement.
 func (q *Query) Delete() *Statement {
-	q.reset()
+	q.Reset()
 	q.str.WriteString("DELETE FROM " + q.table)
 	return &Statement{q}
 }
