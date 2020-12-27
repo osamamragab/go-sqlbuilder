@@ -97,17 +97,28 @@ func (q *Query) Insert(columns []string, values ...[]interface{}) *Statement {
 }
 
 // Update returns sql update statement.
-func (q *Query) Update(data map[string]interface{}) *Statement {
+// data type could be string or map[string]interface{}.
+func (q *Query) Update(data interface{}, args ...interface{}) *Statement {
 	q.Reset()
 	q.str.WriteString("UPDATE " + q.table + " SET ")
-	i := len(data) - 1
-	for k, v := range data {
-		q.str.WriteString(k + "=")
-		q.addArg(v)
-		if i != 0 {
-			q.str.WriteByte(',')
+	switch d := data.(type) {
+	case string:
+		q.str.WriteString(d)
+	case map[string]interface{}:
+		i := len(d) - 1
+		for k, v := range d {
+			q.str.WriteString(k + "=")
+			q.addArg(v)
+			if i != 0 {
+				q.str.WriteByte(',')
+			}
+			i--
 		}
-		i--
+	default:
+		panic("unexpected data type")
+	}
+	if args != nil {
+		q.args = append(q.args, args...)
 	}
 	return &Statement{q}
 }
