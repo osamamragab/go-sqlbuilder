@@ -76,3 +76,13 @@ func (s *Statement) OrderByDesc(columns ...string) *Statement {
 	s.str.WriteString(" DESC")
 	return s
 }
+
+// Returning adds sql returning to query.
+// Should be used with insert or update.
+func (s *Statement) Returning(columns ...string) *Statement {
+	if len(columns) > 0 {
+		s.str.WriteString(" RETURNING ")
+		s.addColumns(columns...)
+	}
+	return s
+}
