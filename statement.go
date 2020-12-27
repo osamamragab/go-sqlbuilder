@@ -65,12 +65,7 @@ func (s *Statement) Offset(n int) *Statement {
 func (s *Statement) OrderBy(columns ...string) *Statement {
 	if len(columns) > 0 {
 		s.str.WriteString(" ORDER BY ")
-		for i, c := range columns {
-			s.str.WriteString(c)
-			if i != len(columns)-1 {
-				s.str.WriteByte(',')
-			}
-		}
+		s.addColumns(columns...)
 	}
 	return s
 }
