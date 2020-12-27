@@ -41,7 +41,7 @@ func (s *Statement) Limit(n int) *Statement {
 	if n <= 0 {
 		panic("invalid limit value")
 	}
-	s.str.WriteString("LIMIT ")
+	s.str.WriteString(" LIMIT ")
 	s.addArg(n)
 	return s
 }
@@ -53,7 +53,7 @@ func (s *Statement) Offset(n int) *Statement {
 	if n <= 0 {
 		panic("invalid offset value")
 	}
-	s.str.WriteString("OFFSET ")
+	s.str.WriteString(" OFFSET ")
 	s.addArg(n)
 	return s
 }
@@ -61,7 +61,7 @@ func (s *Statement) Offset(n int) *Statement {
 // OrderBy adds sql order by columns asc to query.
 func (s *Statement) OrderBy(columns ...string) *Statement {
 	if len(columns) > 0 {
-		s.str.WriteString("ORDER BY ")
+		s.str.WriteString(" ORDER BY ")
 		for i, c := range columns {
 			s.str.WriteString(c)
 			if i != len(columns)-1 {
