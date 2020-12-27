@@ -30,6 +30,9 @@ func (s *Statement) Where(str string, args ...interface{}) *Statement {
 		}
 	} else {
 		s.str.WriteString(str)
+		if args != nil {
+			s.args = append(s.args, args...)
+		}
 	}
 	return s
 }
