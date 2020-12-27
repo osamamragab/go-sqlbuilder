@@ -75,7 +75,7 @@ func (q *Query) Select(columns ...string) *Statement {
 }
 
 // Insert returns sql insert statement.
-func (q *Query) Insert(columns []string, values ...[]string) *Statement {
+func (q *Query) Insert(columns []string, values ...[]interface{}) *Statement {
 	q.Reset()
 	q.str.WriteString("INSERT INTO " + q.table + " (")
 	q.addColumns(columns...)
