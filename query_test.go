@@ -29,11 +29,34 @@ func TestSelect(t *testing.T) {
 		t.Errorf("Select with Where string: want %q, got %q", wantStr, gotStr)
 	}
 	if len(gotArgs) != len(wantArgs) {
-		t.Errorf("Select with Where arguments: want %q, got %q", wantArgs, gotArgs)
+		t.Errorf("Select with Where arguments length: want %q, got %q", len(wantArgs), len(gotArgs))
 	}
 	for i := range wantArgs {
 		if wantArgs[i] != gotArgs[i] {
 			t.Errorf("Select with Where arguments[%d]: want %q, got %q", i, wantArgs[i], gotArgs[i])
+		}
+	}
+}
+
+func TestInsert(t *testing.T) {
+	wantArgs := []interface{}{50, -100, "v1"}
+
+	q := NewQuery("test")
+	q.Insert([]string{"t1", "t2", "t3"}, wantArgs)
+
+	gotStr := q.String()
+	wantStr := "INSERT INTO test (t1,t2,t3) VALUES ($1,$2,$3)"
+	gotArgs := q.Args()
+
+	if gotStr != wantStr {
+		t.Errorf("Insert string: want %q, got %q", wantStr, gotStr)
+	}
+	if len(gotArgs) != len(wantArgs) {
+		t.Errorf("Insert arguments length: want %q, got %q", len(wantArgs), len(gotArgs))
+	}
+	for i := range wantArgs {
+		if wantArgs[i] != gotArgs[i] {
+			t.Errorf("Insert arguments[%d]: want %q, got %q", i, wantArgs[i], gotArgs[i])
 		}
 	}
 }
