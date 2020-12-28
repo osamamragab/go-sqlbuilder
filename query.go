@@ -7,16 +7,31 @@ import (
 
 // Query describes an sql query.
 type Query struct {
-	str   *strings.Builder
-	args  []interface{}
-	table string
+	str    *strings.Builder
+	args   []interface{}
+	table  string
+	driver string
 }
 
 // NewQuery returns new Query with table.
 func NewQuery(table string) *Query {
 	return &Query{
-		str:   &strings.Builder{},
-		table: table,
+		str:    &strings.Builder{},
+		table:  table,
+		driver: "pg",
+	}
+}
+
+// SetDriver sets driver field to the given value.
+// SetDriver panics if driver is not supported.
+func (q *Query) SetDriver(driver string) {
+	switch d := strings.ToLower(driver); d {
+	case "pg", "postgres", "postgresql":
+		q.driver = "pg"
+	case "mysql":
+		q.driver = d
+	default:
+		panic("unsupported driver: " + driver)
 	}
 }
 
@@ -58,7 +73,12 @@ func (q *Query) addColumns(columns ...string) {
 
 func (q *Query) addArg(arg interface{}) {
 	q.args = append(q.args, arg)
-	q.str.WriteString("$" + strconv.Itoa(len(q.args)))
+	switch q.driver {
+	case "pg":
+		q.str.WriteString("$" + strconv.Itoa(len(q.args)))
+	case "mysql":
+		q.str.WriteByte('?')
+	}
 }
 
 // Select returns sql select statement.
