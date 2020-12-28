@@ -24,7 +24,7 @@ func (s *Statement) Where(str string, args ...interface{}) *Statement {
 				s.str.WriteString("$" + strconv.Itoa(len(s.args)))
 
 				i++
-				last += idx + 2
+				last += idx + 1
 				idx = strings.IndexByte(str[last:], '?')
 			}
 			if len(str) > last {
