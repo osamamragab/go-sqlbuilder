@@ -183,7 +183,30 @@ func (q *Query) Delete() *Statement {
 }
 
 // Raw wirtes raw string to query and appends args to query arguments.
-func (q *Query) Raw(str string, args ...interface{}) {
+func (q *Query) Raw(str string, args ...interface{}) *Query {
+	if q.driver == "pg" {
+		idx := strings.IndexByte(str, '?')
+		if idx != -1 {
+			var i, last int
+			for idx != -1 && i < len(args) {
+				q.str.WriteString(str[last : last+idx])
+				q.args = append(q.args, args[i])
+				q.str.WriteByte('$')
+				q.str.WriteString(strconv.Itoa(len(q.args)))
+
+				i++
+				last += idx + 1
+				idx = strings.IndexByte(str[last:], '?')
+			}
+			if len(str) > last {
+				q.str.WriteString(str[last:])
+			}
+			return q
+		}
+	}
 	q.str.WriteString(str)
-	q.args = append(q.args, args...)
+	if args != nil {
+		q.args = append(q.args, args...)
+	}
+	return q
 }
