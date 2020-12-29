@@ -101,19 +101,29 @@ func (q *Query) Insert(columns []string, values ...interface{}) *Statement {
 	q.str.WriteString("INSERT INTO " + q.table + " (")
 	q.addColumns(columns...)
 	q.str.WriteString(") VALUES (")
+
 	var multiple bool
 	for i, vs := range values {
-		v := reflect.ValueOf(vs)
-		if v.Kind() == reflect.Ptr {
-			v = v.Elem()
-		}
-		if v.Kind() == reflect.Slice || v.Kind() == reflect.Array {
-			if !multiple {
+		var v reflect.Value
+		if i == 0 {
+			v = reflect.ValueOf(vs)
+			if v.Kind() == reflect.Ptr {
+				v = v.Elem()
+			}
+			if v.Kind() == reflect.Slice || v.Kind() == reflect.Array {
 				multiple = true
 			}
+		}
+
+		if multiple {
 			if i != 0 {
+				v = reflect.ValueOf(vs)
+				if v.Kind() == reflect.Ptr {
+					v = v.Elem()
+				}
 				q.str.WriteByte('(')
 			}
+
 			for j := 0; j < v.Len(); j++ {
 				q.addArg(v.Index(j).Interface())
 				if j != v.Len()-1 {
@@ -125,9 +135,6 @@ func (q *Query) Insert(columns []string, values ...interface{}) *Statement {
 				q.str.WriteByte(',')
 			}
 		} else {
-			if multiple {
-				panic("invalid values type")
-			}
 			q.addArg(vs)
 			if i != len(values)-1 {
 				q.str.WriteByte(',')
@@ -137,6 +144,7 @@ func (q *Query) Insert(columns []string, values ...interface{}) *Statement {
 	if !multiple {
 		q.str.WriteByte(')')
 	}
+
 	return &Statement{q}
 }
 
