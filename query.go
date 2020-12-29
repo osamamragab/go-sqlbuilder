@@ -149,3 +149,9 @@ func (q *Query) Delete() *Statement {
 	q.str.WriteString("DELETE FROM " + q.table)
 	return &Statement{q}
 }
+
+// Raw wirtes raw string to query and appends args to query arguments.
+func (q *Query) Raw(str string, args ...interface{}) {
+	q.str.WriteString(str)
+	q.args = append(q.args, args...)
+}
