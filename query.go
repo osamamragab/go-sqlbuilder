@@ -1,6 +1,7 @@
 package sqlbuilder
 
 import (
+	"reflect"
 	"strconv"
 	"strings"
 )
@@ -95,23 +96,46 @@ func (q *Query) Select(columns ...string) *Statement {
 }
 
 // Insert returns sql insert statement.
-func (q *Query) Insert(columns []string, values ...[]interface{}) *Statement {
+func (q *Query) Insert(columns []string, values ...interface{}) *Statement {
 	q.Reset()
 	q.str.WriteString("INSERT INTO " + q.table + " (")
 	q.addColumns(columns...)
-	q.str.WriteString(") VALUES ")
+	q.str.WriteString(") VALUES (")
+	var multiple bool
 	for i, vs := range values {
-		q.str.WriteByte('(')
-		for j, v := range vs {
-			q.addArg(v)
-			if j != len(vs)-1 {
+		v := reflect.ValueOf(vs)
+		if v.Kind() == reflect.Ptr {
+			v = v.Elem()
+		}
+		if v.Kind() == reflect.Slice || v.Kind() == reflect.Array {
+			if !multiple {
+				multiple = true
+			}
+			if i != 0 {
+				q.str.WriteByte('(')
+			}
+			for j := 0; j < v.Len(); j++ {
+				q.addArg(v.Index(j).Interface())
+				if j != v.Len()-1 {
+					q.str.WriteByte(',')
+				}
+			}
+			q.str.WriteByte(')')
+			if i != len(values)-1 {
+				q.str.WriteByte(',')
+			}
+		} else {
+			if multiple {
+				panic("invalid values type")
+			}
+			q.addArg(vs)
+			if i != len(values)-1 {
 				q.str.WriteByte(',')
 			}
 		}
+	}
+	if !multiple {
 		q.str.WriteByte(')')
-		if i != len(values)-1 {
-			q.str.WriteByte(',')
-		}
 	}
 	return &Statement{q}
 }
