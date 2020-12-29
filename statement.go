@@ -1,44 +1,14 @@
 package sqlbuilder
 
-import (
-	"strconv"
-	"strings"
-)
-
 // Statement describes an sql query statement.
 type Statement struct {
 	*Query
 }
 
 // Where adds sql where condition to query.
-func (s *Statement) Where(str string, args ...interface{}) *Statement {
+func (s *Statement) Where(cond string, args ...interface{}) *Statement {
 	s.str.WriteString(" WHERE ")
-
-	if s.driver == "pg" {
-		idx := strings.IndexByte(str, '?')
-		if idx != -1 {
-			var i, last int
-			for idx != -1 && i < len(args) {
-				s.str.WriteString(str[last : last+idx])
-				s.args = append(s.args, args[i])
-				s.str.WriteString("$" + strconv.Itoa(len(s.args)))
-
-				i++
-				last += idx + 1
-				idx = strings.IndexByte(str[last:], '?')
-			}
-			if len(str) > last {
-				s.str.WriteString(str[last:])
-			}
-			return s
-		}
-	}
-
-	s.str.WriteString(str)
-	if args != nil {
-		s.args = append(s.args, args...)
-	}
-
+	s.Raw(cond, args...)
 	return s
 }
 
