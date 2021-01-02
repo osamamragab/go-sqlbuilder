@@ -32,7 +32,7 @@ func (q *Query) SetDriver(driver string) {
 	case "mysql":
 		q.driver = d
 	default:
-		panic("unsupported driver: " + driver)
+		panic("sqlbuilder.SetDriver: unsupported driver: " + driver)
 	}
 }
 
@@ -141,13 +141,15 @@ func (q *Query) Insert(columns []string, values ...interface{}) *Statement {
 }
 
 // Update returns sql update statement.
-// data type could be string or map[string]interface{}.
+// data type can be string or map[string]interface{}.
+// args is only used if data is a string.
 func (q *Query) Update(data interface{}, args ...interface{}) *Statement {
 	q.Reset()
 	q.str.WriteString("UPDATE " + q.table + " SET ")
+
 	switch d := data.(type) {
 	case string:
-		q.str.WriteString(d)
+		q.Raw(d, args...)
 	case map[string]interface{}:
 		i := len(d) - 1
 		for k, v := range d {
@@ -159,11 +161,9 @@ func (q *Query) Update(data interface{}, args ...interface{}) *Statement {
 			i--
 		}
 	default:
-		panic("unexpected data type")
+		panic("sqlbuilder.Update: unexpected data type")
 	}
-	if args != nil {
-		q.args = append(q.args, args...)
-	}
+
 	return &Statement{q}
 }
 
