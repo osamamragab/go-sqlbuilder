@@ -102,20 +102,12 @@ func (q *Query) Insert(columns []string, values ...interface{}) *Statement {
 	q.addColumns(columns...)
 	q.str.WriteString(") VALUES (")
 
-	var multiple bool
-	for i, vs := range values {
-		var v reflect.Value
-		if i == 0 {
-			v = reflect.ValueOf(vs)
-			if v.Kind() == reflect.Ptr {
-				v = v.Elem()
-			}
-			if v.Kind() == reflect.Slice || v.Kind() == reflect.Array {
-				multiple = true
-			}
-		}
-
-		if multiple {
+	v := reflect.ValueOf(values[0])
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	if v.Kind() == reflect.Slice || v.Kind() == reflect.Array {
+		for i, vs := range values {
 			if i != 0 {
 				v = reflect.ValueOf(vs)
 				if v.Kind() == reflect.Ptr {
@@ -134,17 +126,17 @@ func (q *Query) Insert(columns []string, values ...interface{}) *Statement {
 			if i != len(values)-1 {
 				q.str.WriteByte(',')
 			}
-		} else {
-			q.addArg(vs)
-			if i != len(values)-1 {
-				q.str.WriteByte(',')
-			}
 		}
-	}
-	if !multiple {
-		q.str.WriteByte(')')
+		return &Statement{q}
 	}
 
+	for i, vs := range values {
+		q.addArg(vs)
+		if i != len(values)-1 {
+			q.str.WriteByte(',')
+		}
+	}
+	q.str.WriteByte(')')
 	return &Statement{q}
 }
 
