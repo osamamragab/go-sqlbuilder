@@ -31,9 +31,9 @@ func TestSelect(t *testing.T) {
 	if len(gotArgs) != len(wantArgs) {
 		t.Errorf("Select with Where arguments length: want %d, got %d", len(wantArgs), len(gotArgs))
 	}
-	for i := range wantArgs {
-		if wantArgs[i] != gotArgs[i] {
-			t.Errorf("Select with Where arguments[%d]: want %v, got %v", i, wantArgs[i], gotArgs[i])
+	for i, v := range gotArgs {
+		if v != wantArgs[i] {
+			t.Errorf("Select with Where arguments[%d]: want %v, got %v", i, wantArgs[i], v)
 		}
 	}
 }
@@ -53,9 +53,9 @@ func TestInsert(t *testing.T) {
 	if len(gotArgs) != len(wantArgs) {
 		t.Errorf("Insert arguments length: want %d, got %d", len(wantArgs), len(gotArgs))
 	}
-	for i := range wantArgs {
-		if wantArgs[i] != gotArgs[i] {
-			t.Errorf("Insert arguments[%d]: want %v, got %v", i, wantArgs[i], gotArgs[i])
+	for i, v := range gotArgs {
+		if v != wantArgs[i] {
+			t.Errorf("Insert arguments[%d]: want %v, got %v", i, wantArgs[i], v)
 		}
 	}
 
@@ -77,9 +77,57 @@ func TestInsert(t *testing.T) {
 	if len(gotArgs) != len(wantArgs) {
 		t.Errorf("Insert Multiple Values arguments length: want %v, got %v", len(wantArgs), len(gotArgs))
 	}
+	for i, v := range gotArgs {
+		if v != wantArgs[i] {
+			t.Errorf("Insert Multiple Values arguments[%d]: want %v, got %v", i, wantArgs[i], v)
+		}
+	}
+}
+
+func TestUpdate(t *testing.T) {
+	q := NewQuery("test")
+	q.Update("t1 = ?, t2 = ?, t3 = ?", "v1", 2, true).Where("id = ?", 101)
+
+	gotStr := q.String()
+	wantStr := "UPDATE test SET t1 = $1, t2 = $2, t3 = $3 WHERE id = $4"
+	gotArgs := q.Args()
+	wantArgs := []interface{}{"v1", 2, true, 101}
+
+	if gotStr != wantStr {
+		t.Errorf("Update string: want %q, got %q", wantStr, gotStr)
+	}
+	if len(gotArgs) != len(wantArgs) {
+		t.Errorf("Update arguments length: want %d, got %d", len(wantArgs), len(gotArgs))
+	}
+	for i, v := range gotArgs {
+		if v != wantArgs[i] {
+			t.Errorf("Update arguments[%d]: want %v, got %v", i, wantArgs[i], v)
+		}
+	}
+
+	q.SetTable("test2")
+	q.Update(map[string]interface{}{
+		"t1": "v1",
+		"t2": 2,
+	}).Where("id = ?", 101)
+
+	gotStr = q.String()
+	gotArgs = q.Args()
+
+	wantStr = "UPDATE test2 SET t1=$1,t2=$2 WHERE id = $3"
+	wantStr2 := "UPDATE test2 SET t2=$1,t1=$2 WHERE id = $3"
+	wantArgs = []interface{}{"v1", 2, 101}
+	wantArgs2 := []interface{}{2, "v1", 101}
+
+	if gotStr != wantStr && gotStr != wantStr2 {
+		t.Errorf("Update with map string: want %q or %q, got %q", wantStr, wantStr2, gotStr)
+	}
+	if len(gotArgs) != len(wantArgs) {
+		t.Errorf("Update with map arguments length: want %d, got %d", len(wantArgs), len(gotArgs))
+	}
 	for i := range wantArgs {
-		if wantArgs[i] != gotArgs[i] {
-			t.Errorf("Insert Multiple Values arguments[%d]: want %v, got %v", i, wantArgs[i], gotArgs[i])
+		if gotArgs[i] != wantArgs[i] && gotArgs[i] != wantArgs2[i] {
+			t.Errorf("Update with map arguments[%d]: want %v or %v, got %v", i, wantArgs[i], wantArgs2[i], gotArgs[i])
 		}
 	}
 }
