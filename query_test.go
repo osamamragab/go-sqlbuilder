@@ -131,3 +131,25 @@ func TestUpdate(t *testing.T) {
 		}
 	}
 }
+
+func TestDelete(t *testing.T) {
+	q := NewQuery("test")
+	q.Delete().Where("id = ?", 5)
+
+	gotStr := q.String()
+	wantStr := "DELETE FROM test WHERE id = $1"
+	gotArgs := q.Args()
+	wantArgs := []interface{}{5}
+
+	if gotStr != wantStr {
+		t.Errorf("Delete string: want %q, got %q", wantStr, gotStr)
+	}
+	if len(gotArgs) != len(wantArgs) {
+		t.Errorf("Delete arguments length: want %d, got %d", len(wantArgs), len(gotArgs))
+	}
+	for i, v := range gotArgs {
+		if v != wantArgs[i] {
+			t.Errorf("Delete arguments[%d]: want %v, got %v", i, wantArgs[i], v)
+		}
+	}
+}
