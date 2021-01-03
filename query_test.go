@@ -153,3 +153,25 @@ func TestDelete(t *testing.T) {
 		}
 	}
 }
+
+func TestRaw(t *testing.T) {
+	q := NewQuery("test")
+	q.Select("c1", "c2").Raw(" WHERE id = ? LIMIT 1", 1)
+
+	gotStr := q.String()
+	wantStr := "SELECT c1,c2 FROM test WHERE id = $1 LIMIT 1"
+	gotArgs := q.Args()
+	wantArgs := []interface{}{1}
+
+	if gotStr != wantStr {
+		t.Errorf("Raw string: want %q, got %q", wantStr, gotStr)
+	}
+	if len(gotArgs) != len(wantArgs) {
+		t.Errorf("Raw arguments length: want %d, got %d", len(wantArgs), len(gotArgs))
+	}
+	for i, v := range gotArgs {
+		if v != wantArgs[i] {
+			t.Errorf("Raw arguments[%d]: want %v, got %v", i, wantArgs[i], v)
+		}
+	}
+}
