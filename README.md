@@ -10,3 +10,22 @@
 ```sh
 go get -u github.com/osamai/go-sqlbuilder
 ```
+
+# Example
+
+```go
+package main
+
+import (
+	"fmt"
+
+	"github.com/osamai/go-sqlbuilder"
+)
+
+func main() {
+	q := sqlbuilder.NewQuery("users").Select("name", "email").Where("id = ?", 1)
+
+	fmt.Println(q.String()) // "SELECT name,email FROM users WHERE id = $1"
+	fmt.Println(q.Args())   // [1]
+}
+```
