@@ -82,6 +82,11 @@ func (q *Query) addArg(arg interface{}) {
 	}
 }
 
+// Statement returns Statement instance from query.
+func (q *Query) Statement() *Statement {
+	return &Statement{q}
+}
+
 // Select returns sql select statement.
 func (q *Query) Select(columns ...string) *Statement {
 	q.Reset()
@@ -92,7 +97,7 @@ func (q *Query) Select(columns ...string) *Statement {
 		q.str.WriteByte('*')
 	}
 	q.str.WriteString(" FROM " + q.table)
-	return &Statement{q}
+	return q.Statement()
 }
 
 // Insert returns sql insert statement.
@@ -127,7 +132,7 @@ func (q *Query) Insert(columns []string, values ...interface{}) *Statement {
 				q.str.WriteByte(',')
 			}
 		}
-		return &Statement{q}
+		return q.Statement()
 	}
 
 	for i, vs := range values {
@@ -137,7 +142,7 @@ func (q *Query) Insert(columns []string, values ...interface{}) *Statement {
 		}
 	}
 	q.str.WriteByte(')')
-	return &Statement{q}
+	return q.Statement()
 }
 
 // Update returns sql update statement.
@@ -164,14 +169,14 @@ func (q *Query) Update(data interface{}, args ...interface{}) *Statement {
 		panic("sqlbuilder.Update: unexpected data type")
 	}
 
-	return &Statement{q}
+	return q.Statement()
 }
 
 // Delete returns sql delete statement.
 func (q *Query) Delete() *Statement {
 	q.Reset()
 	q.str.WriteString("DELETE FROM " + q.table)
-	return &Statement{q}
+	return q.Statement()
 }
 
 // Raw wirtes raw string to query and appends args to query arguments.
