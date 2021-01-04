@@ -23,23 +23,11 @@ func NewQuery(table string) *Query {
 	}
 }
 
-// SetDriver sets driver field to the given value.
-// SetDriver panics if driver is not supported.
-func (q *Query) SetDriver(driver string) {
-	switch d := strings.ToLower(driver); d {
-	case "pg", "postgres", "postgresql":
-		q.driver = "pg"
-	case "mysql":
-		q.driver = d
-	default:
-		panic("sqlbuilder.SetDriver: unsupported driver: " + driver)
-	}
-}
-
 // Reset resets query string and arguments.
-func (q *Query) Reset() {
+func (q *Query) Reset() *Query {
 	q.str.Reset()
 	q.args = nil
+	return q
 }
 
 // String returns query string.
@@ -58,9 +46,24 @@ func (q *Query) Table() string {
 }
 
 // SetTable sets table field and calls Reset.
-func (q *Query) SetTable(table string) {
+func (q *Query) SetTable(table string) *Query {
 	q.Reset()
 	q.table = table
+	return q
+}
+
+// SetDriver sets driver field to the given value.
+// SetDriver panics if driver is not supported.
+func (q *Query) SetDriver(driver string) *Query {
+	switch d := strings.ToLower(driver); d {
+	case "pg", "postgres", "postgresql":
+		q.driver = "pg"
+	case "mysql":
+		q.driver = d
+	default:
+		panic("sqlbuilder.SetDriver: unsupported driver: " + driver)
+	}
+	return q
 }
 
 func (q *Query) addColumns(columns ...string) {
