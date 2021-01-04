@@ -196,9 +196,16 @@ func (q *Query) Raw(str string, args ...interface{}) *Query {
 			return q
 		}
 	}
+
 	q.str.WriteString(str)
 	if args != nil {
 		q.args = append(q.args, args...)
 	}
+	return q
+}
+
+// RawByte writes byte to query.
+func (q *Query) RawByte(b byte) *Query {
+	q.str.WriteByte(b)
 	return q
 }
