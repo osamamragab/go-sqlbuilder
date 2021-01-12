@@ -43,7 +43,7 @@ func TestInsert(t *testing.T) {
 	q.Insert([]string{"t1", "t2", "t3"}, 50, -100, "v1")
 
 	gotStr := q.String()
-	wantStr := "INSERT INTO test (t1,t2,t3) VALUES ($1,$2,$3)"
+	wantStr := "INSERT INTO test(t1,t2,t3)VALUES($1,$2,$3)"
 	gotArgs := q.Args()
 	wantArgs := []interface{}{50, -100, "v1"}
 
@@ -67,7 +67,7 @@ func TestInsert(t *testing.T) {
 	)
 
 	gotStr = q.String()
-	wantStr = "INSERT INTO test2 (t1,t2,t3) VALUES ($1,$2,$3),($4,$5,$6)"
+	wantStr = "INSERT INTO test2(t1,t2,t3)VALUES($1,$2,$3),($4,$5,$6)"
 	gotArgs = q.Args()
 	wantArgs = []interface{}{"12", 10, "abcdefg", "hijk", uint8(1), 21.12}
 
