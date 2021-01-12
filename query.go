@@ -79,7 +79,8 @@ func (q *Query) addArg(arg interface{}) {
 	q.args = append(q.args, arg)
 	switch q.driver {
 	case "pg":
-		q.str.WriteString("$" + strconv.Itoa(len(q.args)))
+		q.str.WriteByte('$')
+		q.str.WriteString(strconv.Itoa(len(q.args)))
 	case "mysql":
 		q.str.WriteByte('?')
 	}
@@ -99,16 +100,19 @@ func (q *Query) Select(columns ...string) *Statement {
 	} else {
 		q.str.WriteByte('*')
 	}
-	q.str.WriteString(" FROM " + q.table)
+	q.str.WriteString(" FROM ")
+	q.str.WriteString(q.table)
 	return q.Statement()
 }
 
 // Insert returns sql insert statement.
 func (q *Query) Insert(columns []string, values ...interface{}) *Statement {
 	q.Reset()
-	q.str.WriteString("INSERT INTO " + q.table + " (")
+	q.str.WriteString("INSERT INTO ")
+	q.str.WriteString(q.table)
+	q.str.WriteByte('(')
 	q.addColumns(columns...)
-	q.str.WriteString(") VALUES (")
+	q.str.WriteString(")VALUES(")
 
 	v := reflect.ValueOf(values[0])
 	if v.Kind() == reflect.Ptr {
@@ -153,7 +157,9 @@ func (q *Query) Insert(columns []string, values ...interface{}) *Statement {
 // args is only used if data is a string.
 func (q *Query) Update(data interface{}, args ...interface{}) *Statement {
 	q.Reset()
-	q.str.WriteString("UPDATE " + q.table + " SET ")
+	q.str.WriteString("UPDATE ")
+	q.str.WriteString(q.table)
+	q.str.WriteString(" SET ")
 
 	switch d := data.(type) {
 	case string:
@@ -161,7 +167,8 @@ func (q *Query) Update(data interface{}, args ...interface{}) *Statement {
 	case map[string]interface{}:
 		i := len(d) - 1
 		for k, v := range d {
-			q.str.WriteString(k + "=")
+			q.str.WriteString(k)
+			q.str.WriteByte('=')
 			q.addArg(v)
 			if i != 0 {
 				q.str.WriteByte(',')
@@ -178,7 +185,8 @@ func (q *Query) Update(data interface{}, args ...interface{}) *Statement {
 // Delete returns sql delete statement.
 func (q *Query) Delete() *Statement {
 	q.Reset()
-	q.str.WriteString("DELETE FROM " + q.table)
+	q.str.WriteString("DELETE FROM ")
+	q.str.WriteString(q.table)
 	return q.Statement()
 }
 
