@@ -10,15 +10,15 @@ import (
 type Query struct {
 	str    *strings.Builder
 	args   []interface{}
-	table  string
+	tables []string
 	driver string
 }
 
 // NewQuery returns new Query with table.
-func NewQuery(table string) *Query {
+func NewQuery(tables ...string) *Query {
 	return &Query{
 		str:    &strings.Builder{},
-		table:  table,
+		tables: tables,
 		driver: "pg",
 	}
 }
@@ -40,15 +40,27 @@ func (q *Query) Args() []interface{} {
 	return q.args
 }
 
-// Table returns table name.
+// Table returns first table name.
 func (q *Query) Table() string {
-	return q.table
+	return q.tables[0]
 }
 
-// SetTable sets table field and calls Reset.
+// Tables returns query's tables.
+func (q *Query) Tables() []string {
+	return q.tables
+}
+
+// SetTable sets first table in tables field and calls Reset.
 func (q *Query) SetTable(table string) *Query {
 	q.Reset()
-	q.table = table
+	q.tables[0] = table
+	return q
+}
+
+// SetTables sets tables field and calls Reset.
+func (q *Query) SetTables(tables ...string) *Query {
+	q.Reset()
+	q.tables = tables
 	return q
 }
 
@@ -86,6 +98,18 @@ func (q *Query) addArg(arg interface{}) {
 	}
 }
 
+// addTables writes tables to query string, panics if tables length equal 0.
+func (q *Query) addTables() {
+	switch len(q.tables) {
+	case 0:
+		panic("sqlbuilder: tables cannot be empty")
+	case 1:
+		q.str.WriteString(q.tables[0])
+	default:
+		q.str.WriteString(strings.Join(q.tables, ","))
+	}
+}
+
 // Statement returns Statement instance from query.
 func (q *Query) Statement() *Statement {
 	return &Statement{q}
@@ -101,7 +125,7 @@ func (q *Query) Select(columns ...string) *Statement {
 		q.str.WriteByte('*')
 	}
 	q.str.WriteString(" FROM ")
-	q.str.WriteString(q.table)
+	q.addTables()
 	return q.Statement()
 }
 
@@ -109,7 +133,7 @@ func (q *Query) Select(columns ...string) *Statement {
 func (q *Query) Insert(columns []string, values ...interface{}) *Statement {
 	q.Reset()
 	q.str.WriteString("INSERT INTO ")
-	q.str.WriteString(q.table)
+	q.addTables()
 	q.str.WriteByte('(')
 	q.addColumns(columns...)
 	q.str.WriteString(")VALUES(")
@@ -127,7 +151,6 @@ func (q *Query) Insert(columns []string, values ...interface{}) *Statement {
 				}
 				q.str.WriteByte('(')
 			}
-
 			for j := 0; j < v.Len(); j++ {
 				q.addArg(v.Index(j).Interface())
 				if j != v.Len()-1 {
@@ -158,7 +181,7 @@ func (q *Query) Insert(columns []string, values ...interface{}) *Statement {
 func (q *Query) Update(data interface{}, args ...interface{}) *Statement {
 	q.Reset()
 	q.str.WriteString("UPDATE ")
-	q.str.WriteString(q.table)
+	q.addTables()
 	q.str.WriteString(" SET ")
 
 	switch d := data.(type) {
@@ -186,7 +209,7 @@ func (q *Query) Update(data interface{}, args ...interface{}) *Statement {
 func (q *Query) Delete() *Statement {
 	q.Reset()
 	q.str.WriteString("DELETE FROM ")
-	q.str.WriteString(q.table)
+	q.addTables()
 	return q.Statement()
 }
 
@@ -201,7 +224,6 @@ func (q *Query) Raw(str string, args ...interface{}) *Query {
 				q.args = append(q.args, args[i])
 				q.str.WriteByte('$')
 				q.str.WriteString(strconv.Itoa(len(q.args)))
-
 				i++
 				last += idx + 1
 				idx = strings.IndexByte(str[last:], '?')
