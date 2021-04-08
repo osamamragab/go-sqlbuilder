@@ -47,8 +47,11 @@ func (s *Statement) OrderBy(columns ...string) *Statement {
 
 // OrderByDesc adds sql order by columns desc to query.
 func (s *Statement) OrderByDesc(columns ...string) *Statement {
-	s.OrderBy(columns...)
-	s.str.WriteString(" DESC")
+	if len(columns) > 0 {
+		s.str.WriteString(" ORDER BY ")
+		s.addColumns(columns...)
+		s.str.WriteString(" DESC")
+	}
 	return s
 }
 
