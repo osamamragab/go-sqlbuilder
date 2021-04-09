@@ -17,7 +17,7 @@ func (s *Statement) Where(cond string, args ...interface{}) *Statement {
 // Limit panics if n <= 0.
 func (s *Statement) Limit(n int) *Statement {
 	if n <= 0 {
-		panic("invalid limit value")
+		panic("sqlbuilder: invalid limit value")
 	}
 	s.str.WriteString(" LIMIT ")
 	s.addArg(n)
@@ -29,7 +29,7 @@ func (s *Statement) Limit(n int) *Statement {
 // Offset panics if n <= 0.
 func (s *Statement) Offset(n int) *Statement {
 	if n <= 0 {
-		panic("invalid offset value")
+		panic("sqlbuilder: invalid offset value")
 	}
 	s.str.WriteString(" OFFSET ")
 	s.addArg(n)
