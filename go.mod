@@ -1,3 +1,3 @@
-module github.com/osamai/go-sqlbuilder
+module gitlab.com/osamai/go-sqlbuilder
 
 go 1.15
